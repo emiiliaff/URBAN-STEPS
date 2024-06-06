@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function() {
-  // Objetos con precios para cada modelo
   const modelos = [
       { id: 1, nombre: 'Modelo1', precio: 100 },
       { id: 2, nombre: 'Modelo2', precio: 200 },
@@ -8,18 +7,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-  // Función para actualizar el carrito en el DOM y el localStorage
   function actualizarCarrito() {
       localStorage.setItem("carrito", JSON.stringify(carrito));
       mostrarCarrito();
   }
 
-  // Función para calcular el total del carrito
   function calcularTotal() {
       return carrito.reduce((total, modelo) => total + modelo.precio, 0);
   }
 
-  // Función para mostrar el carrito en el DOM
   function mostrarCarrito() {
       const cartItems = document.getElementById('cart-items');
       cartItems.innerHTML = '';
@@ -33,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function() {
       cartTotal.textContent = `Total: $${calcularTotal()}`;
   }
 
-  // Añadir event listeners a los botones "Add to Cart"
   document.querySelectorAll('.add-to-cart').forEach(button => {
       button.addEventListener('click', function() {
           const id = parseInt(this.getAttribute('data-id'));
@@ -46,12 +41,44 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   });
 
-  // Mostrar el total del carrito al hacer clic en el botón del carrito
-  document.getElementById('carritoButton').addEventListener('click', function() {
-      alert(`El precio total es: $${calcularTotal()}`);
+  const carritoButton = document.getElementById('carritoButton');
+  const cartModal = document.getElementById('cartModal');
+  const closeModal = document.getElementsByClassName('close')[0];
+  const purchaseButton = document.getElementById('purchaseButton');
+  const purchaseForm = document.getElementById('purchaseForm');
+  const submitPurchase = document.getElementById('submitPurchase');
+
+  carritoButton.addEventListener('click', function() {
+      cartModal.style.display = 'block';
+      mostrarCarrito();
   });
 
-  // Mostrar el carrito al cargar la página
-  mostrarCarrito();
-});
+  closeModal.addEventListener('click', function() {
+      cartModal.style.display = 'none';
+  });
 
+  window.addEventListener('click', function(event) {
+      if (event.target === cartModal) {
+          cartModal.style.display = 'none';
+      }
+  });
+
+  purchaseButton.addEventListener('click', function() {
+      purchaseForm.classList.toggle('hidden');
+  });
+
+  submitPurchase.addEventListener('click', function() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      if (name && email) {
+          localStorage.setItem('purchaseDetails', JSON.stringify({ name, email }));
+          alert('Compra realizada con éxito');
+          cartModal.style.display = 'none';
+          carrito = [];
+          actualizarCarrito();
+          purchaseForm.classList.add('hidden');
+      } else {
+          alert('Por favor, complete todos los campos');
+      }
+  });
+});
