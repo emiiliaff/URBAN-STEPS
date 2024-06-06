@@ -1,63 +1,57 @@
-function saludar(nombre, apellido) {
-  console.log("Hola, " + nombre + " " + apellido);
-  alert("Hola, " + nombre + " " + apellido);
-}
+document.addEventListener("DOMContentLoaded", function() {
+  // Objetos con precios para cada modelo
+  const modelos = [
+      { id: 1, nombre: 'Modelo1', precio: 100 },
+      { id: 2, nombre: 'Modelo2', precio: 200 },
+      { id: 3, nombre: 'Modelo3', precio: 300 }
+  ];
 
-let nombreIngresado;
-let apellidoIngresado;
+  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-do {
-  nombreIngresado = prompt("Ingresa tu nombre");
-  apellidoIngresado = prompt("Ingresa tu apellido");
-} while (nombreIngresado === "" || apellidoIngresado === "");
-
-saludar(nombreIngresado, apellidoIngresado);
-
-// Objetos con precios para cada modelo
-let modelos = [
-  { id: 1, nombre: 'Modelo1', precio: 100 },
-  { id: 2, nombre: 'Modelo2', precio: 200 },
-  { id: 3, nombre: 'Modelo3', precio: 300 }
-];
-
-let carrito = [];
-
-// Función para mostrar las opciones al usuario
-function mostrarOpciones() {
-  let mensaje = "Selecciona un modelo:\n";
-  modelos.forEach(modelo => {
-      mensaje += modelo.id + ". " + modelo.nombre + " - $" + modelo.precio + "\n";
-  });
-  alert(mensaje);
-}
-
-function calcularTotal() {
-  let total = 0;
-  carrito.forEach(modelo => {
-      total += modelo.precio;
-  });
-  return total;
-}
-
-do {
-  if (carrito.length === 0) {
-      mostrarOpciones();
-  } else {
-      alert("Precio total hasta el momento: $" + calcularTotal());
+  // Función para actualizar el carrito en el DOM y el localStorage
+  function actualizarCarrito() {
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      mostrarCarrito();
   }
 
-  let opcionElegida = prompt("Ingresa el número correspondiente al modelo que deseas comprar:");
-  let modeloSeleccionado = modelos.find(modelo => modelo.id == opcionElegida);
-  
-  if (modeloSeleccionado) {
-      carrito.push(modeloSeleccionado);
-  } else {
-      alert("Opción no válida. Por favor, selecciona un modelo de la lista.");
+  // Función para calcular el total del carrito
+  function calcularTotal() {
+      return carrito.reduce((total, modelo) => total + modelo.precio, 0);
   }
-} while (confirm("¿Deseas elegir otro modelo?"));
 
-let precioTotal = calcularTotal();
+  // Función para mostrar el carrito en el DOM
+  function mostrarCarrito() {
+      const cartItems = document.getElementById('cart-items');
+      cartItems.innerHTML = '';
+      carrito.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = `${item.nombre} - $${item.precio}`;
+          cartItems.appendChild(li);
+      });
 
-alert("El precio total es: $" + precioTotal);
-console.log("El precio total es: $" + precioTotal);
+      const cartTotal = document.getElementById('cart-total');
+      cartTotal.textContent = `Total: $${calcularTotal()}`;
+  }
+
+  // Añadir event listeners a los botones "Add to Cart"
+  document.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', function() {
+          const id = parseInt(this.getAttribute('data-id'));
+          const modeloSeleccionado = modelos.find(modelo => modelo.id === id);
+
+          if (modeloSeleccionado) {
+              carrito.push(modeloSeleccionado);
+              actualizarCarrito();
+          }
+      });
+  });
+
+  // Mostrar el total del carrito al hacer clic en el botón del carrito
+  document.getElementById('carritoButton').addEventListener('click', function() {
+      alert(`El precio total es: $${calcularTotal()}`);
+  });
+
+  // Mostrar el carrito al cargar la página
+  mostrarCarrito();
+});
 
